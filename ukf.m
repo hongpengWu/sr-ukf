@@ -26,19 +26,19 @@ Rs=r;        % std of measurement
 f=@(x)[x(2);x(3);0.05*x(1)*(x(2)+x(3))];  % nonlinear state equations
 h=@(x)x(1);                               % measurement equation
 s=[0;0;1];                                % initial state
-x=s+q*randn(3,1); %initial state          % initial state with noise
+input_data = dlmread('ukf_input.txt');
+N = input_data(1,1);
+x = input_data(2,1:n)';
 S = eye(n);                               % initial square root of state covraiance
-N=20;                                     % total dynamic steps
 xV = zeros(n,N);          %estmate        % allocate memory
 sV = zeros(n,N);          %actual
 zV = zeros(1,N);
 for k=1:N
-  z = h(s) + r*randn;                     % measurments
-  sV(:,k)= s;                             % save actual state
-  zV(k)  = z;                             % save measurment
+  z = input_data(2 + k, n + 1);
+  sV(:,k) = input_data(2 + k, 1:n)';
+  zV(k) = z;
   [x, S] = ukf(f,x,S,h,z,Qs,Rs);            % ekf 
   xV(:,k) = x;                            % save estimate
-  s = f(s) + q*randn(3,1);                % update process 
 end
 for k=1:3                                 % plot results
   subplot(3,1,k)
@@ -122,6 +122,5 @@ function X=sigmas(x,S,c)
 A = c*S';
 Y = x(:,ones(1,numel(x)));
 X = [x Y+A Y-A]; 
-
 
 
